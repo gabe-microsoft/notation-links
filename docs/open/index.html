@@ -56,11 +56,14 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .status { color: var(--fg-muted); font-size: 14px; }
+        .status strong { color: var(--fg); }
         .fallback { display: none; margin-top: 24px; }
         .fallback.show { display: block; }
-        .fallback p { color: var(--fg-muted); font-size: 13px; margin-bottom: 16px; }
+        .fallback p { color: var(--fg-muted); font-size: 13px; margin-bottom: 12px; }
         .btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             background: var(--accent);
             color: var(--bg);
             text-decoration: none;
@@ -71,24 +74,19 @@
             cursor: pointer;
             border: none;
             transition: opacity 0.15s;
+            margin-bottom: 8px;
         }
         .btn:hover { opacity: 0.9; }
-        .link-info {
-            margin-top: 20px;
-            padding: 12px;
-            background: var(--bg);
+        .btn-ghost {
+            background: transparent;
+            color: var(--fg);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            text-align: left;
-            font-size: 12px;
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-            color: var(--fg-muted);
-            word-break: break-all;
         }
-        .link-info dt { color: var(--fg); font-weight: 600; margin-top: 6px; }
-        .link-info dt:first-child { margin-top: 0; }
-        .link-info dd { margin-left: 0; margin-top: 2px; }
+        .btn-ghost:hover { border-color: var(--fg-muted); }
+        .btn-ghost svg { fill: var(--fg); }
+        .btn-row { display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .error { color: #f85149; }
+        .note { color: var(--fg-muted); font-size: 12px; margin-top: 12px; }
     </style>
 </head>
 <body>
@@ -97,32 +95,25 @@
         <div class="subtitle">Notebook editor backed by GitHub</div>
 
         <div id="loading">
-            <div class="spinner"></div>
-            <div class="status">Opening in Notation…</div>
+            <div id="loadingStatus" class="status">Opening in Notation…</div>
+            <div id="spinner" class="spinner" style="margin-top: 20px;"></div>
         </div>
 
         <div id="fallback" class="fallback">
-            <p>Didn't open automatically?</p>
-            <a id="manualBtn" class="btn" href="#">Open in Notation</a>
-            <p style="margin-top: 16px;">
-                If Notation isn't installed or the link handler isn't registered,
-                the button above may not work.
+            <div class="btn-row">
+                <a id="githubBtn" class="btn btn-ghost" href="#">
+                    <svg height="16" width="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                    View page in GitHub
+                </a>
+                <a id="manualBtn" class="btn" href="#">Edit page in Notation app</a>
+            </div>
+            <p class="note">
+                Ensure that the Notation app is installed.
             </p>
         </div>
 
         <div id="error" class="fallback">
             <p class="error">This link is missing required parameters.</p>
-        </div>
-
-        <div id="linkInfo" class="link-info" style="display: none;">
-            <dl>
-                <dt>Repository</dt>
-                <dd id="infoRepo"></dd>
-                <dt>Branch</dt>
-                <dd id="infoBranch"></dd>
-                <dt>Path</dt>
-                <dd id="infoPath"></dd>
-            </dl>
         </div>
     </div>
 
@@ -132,6 +123,8 @@
             var repo = params.get("repo");
             var branch = params.get("branch");
             var path = params.get("path");
+            var title = params.get("title");
+            var type = params.get("type");
 
             if (!repo || !branch || !path) {
                 document.getElementById("loading").style.display = "none";
@@ -139,27 +132,33 @@
                 return;
             }
 
-            // Show link info
-            document.getElementById("infoRepo").textContent = repo;
-            document.getElementById("infoBranch").textContent = branch;
-            document.getElementById("infoPath").textContent = path;
-            document.getElementById("linkInfo").style.display = "block";
+            // Update loading status with title and type
+            var typeLabel = type === "s" ? "section" : "page";
+            if (title) {
+                document.getElementById("loadingStatus").innerHTML =
+                    "Opening <strong>" + title.replace(/</g, "&lt;") + "</strong> " + typeLabel + " in Notation\u2026";
+                document.title = "Opening " + title + " in Notation\u2026";
+            }
 
-            // Build the notation: URI
+            // Build the notation: URI (title/type are display-only, not forwarded)
             var notationUri = "notation:open"
                 + "?repo=" + encodeURIComponent(repo)
                 + "&branch=" + encodeURIComponent(branch)
                 + "&path=" + encodeURIComponent(path);
 
-            // Wire up the manual button
+            // Build GitHub blob URL
+            var githubUrl = repo + "/blob/" + branch + "/" + path;
+
+            // Wire up buttons
             document.getElementById("manualBtn").href = notationUri;
+            document.getElementById("githubBtn").href = githubUrl;
 
             // Attempt to open
             window.location = notationUri;
 
-            // Show fallback after 2 seconds
+            // Show fallback after 2 seconds (keep status text, just hide spinner)
             setTimeout(function () {
-                document.getElementById("loading").style.display = "none";
+                document.getElementById("spinner").style.display = "none";
                 document.getElementById("fallback").classList.add("show");
             }, 2000);
         })();
