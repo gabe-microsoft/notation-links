@@ -119,8 +119,27 @@
 
     <script>
         (function () {
+            function getValidatedGithubRepoBase(repoValue) {
+                try {
+                    if (!repoValue) {
+                        return null;
+                    }
+                    var parsed = new URL(repoValue);
+                    if (parsed.protocol !== "https:" || parsed.hostname !== "github.com") {
+                        return null;
+                    } 
+                    var match = parsed.pathname.match(/^\/[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+\/?$/);
+                    if (!match) {
+                        return null;
+                    }
+                    return "https://github.com" + parsed.pathname.replace(/\/+$/, "");
+                } catch (e) {
+                    return null;
+                }
+            }
+
             var params = new URLSearchParams(window.location.search);
-            var repo = params.get("repo");
+            var repo = getValidatedGithubRepoBase(params.get("repo"));
             var branch = params.get("branch");
             var path = params.get("path");
             var title = params.get("title");
@@ -135,8 +154,13 @@
             // Update loading status with title and type
             var typeLabel = type === "s" ? "section" : "page";
             if (title) {
-                document.getElementById("loadingStatus").innerHTML =
-                    "Opening <strong>" + title.replace(/</g, "&lt;") + "</strong> " + typeLabel + " in Notation\u2026";
+                var loadingStatus = document.getElementById("loadingStatus");
+                loadingStatus.textContent = "";
+                loadingStatus.appendChild(document.createTextNode("Opening "));
+                var strong = document.createElement("strong");
+                strong.textContent = title;
+                loadingStatus.appendChild(strong);
+                loadingStatus.appendChild(document.createTextNode(" " + typeLabel + " in Notation\u2026"));
                 document.title = "Opening " + title + " in Notation\u2026";
             }
 
