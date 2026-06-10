@@ -141,18 +141,26 @@
             var params = new URLSearchParams(window.location.search);
             var repo = getValidatedGithubRepoBase(params.get("repo"));
             var branch = params.get("branch");
-            var path = params.get("path");
+            var path = params.get("path") || "";
             var title = params.get("title");
             var type = params.get("type");
 
-            if (!repo || !branch || !path) {
+            // type=n (notebook) is the only case where path may be empty.
+            var isNotebook = type === "n";
+            var isFolder = type === "f";
+            var isSection = type === "s";
+
+            if (!repo || !branch || (!isNotebook && !path)) {
                 document.getElementById("loading").style.display = "none";
                 document.getElementById("error").classList.add("show");
                 return;
             }
 
             // Update loading status with title and type
-            var typeLabel = type === "s" ? "section" : "page";
+            var typeLabel = isSection ? "section"
+                : isFolder ? "folder"
+                : isNotebook ? "notebook"
+                : "page";
             if (title) {
                 var loadingStatus = document.getElementById("loadingStatus");
                 loadingStatus.textContent = "";
@@ -164,18 +172,32 @@
                 document.title = "Opening " + title + " in Notation\u2026";
             }
 
-            // Build the notation: URI (title/type are display-only, not forwarded)
+            // Build the notation: URI. Forward type so the app can route
+            // folder/notebook links correctly; title is display-only.
             var notationUri = "notation:open"
                 + "?repo=" + encodeURIComponent(repo)
                 + "&branch=" + encodeURIComponent(branch)
                 + "&path=" + encodeURIComponent(path);
+            if (type) {
+                notationUri += "&type=" + encodeURIComponent(type);
+            }
 
-            // Build GitHub blob URL
+            // Build GitHub fallback URL (only used for pages/sections).
             var githubUrl = repo + "/blob/" + branch + "/" + path;
 
             // Wire up buttons
-            document.getElementById("manualBtn").href = notationUri;
-            document.getElementById("githubBtn").href = githubUrl;
+            var manualBtn = document.getElementById("manualBtn");
+            manualBtn.href = notationUri;
+            manualBtn.textContent = "Edit " + typeLabel + " in Notation app";
+
+            // GitHub fallback only makes sense for pages/sections (notebooks
+            // and folders don't have a single meaningful blob to open).
+            var githubBtn = document.getElementById("githubBtn");
+            if (isNotebook || isFolder) {
+                githubBtn.style.display = "none";
+            } else {
+                githubBtn.href = githubUrl;
+            }
 
             // Attempt to open
             window.location = notationUri;
