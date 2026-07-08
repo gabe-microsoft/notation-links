@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="app-logo.png">
     <title>Opening in Lattice Notes…</title>
     <style>
         :root {
-            --bg: #0d1117;
-            --bg-card: #161b22;
-            --border: #30363d;
-            --fg: #e6edf3;
-            --fg-muted: #7d8590;
-            --accent: #58a6ff;
-            --green: #3fb950;
+            --bg: #ffffff;
+            --border: #d0d7de;
+            --fg: #1f2328;
+            --fg-muted: #59636e;
+            --accent: #0969da;
+            --error: #d1242f;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -24,97 +24,47 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            line-height: 1.5;
         }
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 40px;
-            max-width: 480px;
+        .content {
+            max-width: 640px;
             width: 100%;
             text-align: center;
         }
-        .logo {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
+        .logo-link {
+            display: inline-block;
+            margin: 0 auto 24px;
         }
-        .subtitle {
-            color: var(--fg-muted);
-            font-size: 14px;
+        .logo {
+            display: block;
+        }
+        .wordmark {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--fg);
+            margin-bottom: 24px;
+            letter-spacing: -0.25px;
+        }
+        p {
+            color: var(--fg);
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+        p.lead {
+            font-size: 18px;
             margin-bottom: 32px;
         }
-        .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid var(--border);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 16px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .status { color: var(--fg-muted); font-size: 14px; }
-        .status strong { color: var(--fg); }
-        .fallback { display: none; margin-top: 24px; }
-        .fallback.show { display: block; }
-        .fallback p { color: var(--fg-muted); font-size: 13px; margin-bottom: 12px; }
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--accent);
-            color: var(--bg);
-            text-decoration: none;
-            padding: 10px 24px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            transition: opacity 0.15s;
-            margin-bottom: 8px;
-        }
-        .btn:hover { opacity: 0.9; }
-        .btn-ghost {
-            background: transparent;
-            color: var(--fg);
-            border: 1px solid var(--border);
-        }
-        .btn-ghost:hover { border-color: var(--fg-muted); }
-        .btn-ghost svg { fill: var(--fg); }
-        .btn-row { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .error { color: #f85149; }
-        .note { color: var(--fg-muted); font-size: 12px; margin-top: 12px; }
+        p:last-child { margin-bottom: 0; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .error { color: var(--error); }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="logo">Lattice Notes</div>
-        <div class="subtitle">Notebook editor backed by GitHub</div>
-
-        <div id="loading">
-            <div id="loadingStatus" class="status">Opening in Lattice Notes…</div>
-            <div id="spinner" class="spinner" style="margin-top: 20px;"></div>
-        </div>
-
-        <div id="fallback" class="fallback">
-            <div class="btn-row">
-                <a id="githubBtn" class="btn btn-ghost" href="#">
-                    <svg height="16" width="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
-                    View page in GitHub
-                </a>
-                <a id="manualBtn" class="btn" href="#">Edit page in Lattice Notes app</a>
-            </div>
-            <p class="note">
-                Ensure that the Lattice Notes app is installed.
-            </p>
-        </div>
-
-        <div id="error" class="fallback">
-            <p class="error">This link is missing required parameters.</p>
-        </div>
+    <div class="content">
+        <a href="https://aka.ms/lattice-notes" class="logo-link"><img src="app-logo.png" width="128" height="128" alt="Lattice Notes" class="logo"></a>
+        <h1 class="wordmark">Lattice Notes</h1>
+        <div id="body"></div>
     </div>
 
     <script>
@@ -127,7 +77,7 @@
                     var parsed = new URL(repoValue);
                     if (parsed.protocol !== "https:" || parsed.hostname !== "github.com") {
                         return null;
-                    } 
+                    }
                     var match = parsed.pathname.match(/^\/[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+\/?$/);
                     if (!match) {
                         return null;
@@ -150,26 +100,60 @@
             var isFolder = type === "f";
             var isSection = type === "s";
 
+            var body = document.getElementById("body");
+
             if (!repo || !branch || (!isNotebook && !path)) {
-                document.getElementById("loading").style.display = "none";
-                document.getElementById("error").classList.add("show");
+                var errP = document.createElement("p");
+                errP.className = "error";
+                errP.textContent = "This link is missing required parameters.";
+                body.appendChild(errP);
                 return;
             }
 
-            // Update loading status with title and type
             var typeLabel = isSection ? "section"
                 : isFolder ? "folder"
                 : isNotebook ? "notebook"
                 : "page";
+
             if (title) {
-                var loadingStatus = document.getElementById("loadingStatus");
-                loadingStatus.textContent = "";
-                loadingStatus.appendChild(document.createTextNode("Opening "));
+                document.title = "Opening " + title + " in Lattice Notes\u2026";
+            }
+
+            // Paragraph 1: what this page is doing
+            var p1 = document.createElement("p");
+            p1.className = "lead";
+            p1.appendChild(document.createTextNode("Opening "));
+            if (title) {
                 var strong = document.createElement("strong");
                 strong.textContent = title;
-                loadingStatus.appendChild(strong);
-                loadingStatus.appendChild(document.createTextNode(" " + typeLabel + " in Lattice Notes\u2026"));
-                document.title = "Opening " + title + " in Lattice Notes\u2026";
+                p1.appendChild(strong);
+                p1.appendChild(document.createTextNode(" " + typeLabel));
+            } else {
+                p1.appendChild(document.createTextNode(typeLabel));
+            }
+            p1.appendChild(document.createTextNode(" in Lattice Notes\u2026"));
+            body.appendChild(p1);
+
+            // Paragraph 2: install link
+            var p2 = document.createElement("p");
+            p2.appendChild(document.createTextNode("Not opening? Install "));
+            var installLink = document.createElement("a");
+            installLink.href = "https://aka.ms/lattice-notes";
+            installLink.textContent = "Lattice Notes";
+            p2.appendChild(installLink);
+            body.appendChild(p2);
+
+            // Paragraph 3: GitHub view link (pages/sections only)
+            if (!isNotebook && !isFolder) {
+                var githubUrl = repo + "/blob/" + branch + "/" + path;
+                var p3 = document.createElement("p");
+                p3.appendChild(document.createTextNode("Or view read-only "));
+                var ghLink = document.createElement("a");
+                ghLink.href = githubUrl;
+                ghLink.textContent = "page on GitHub";
+                p3.appendChild(ghLink);
+                p3.appendChild(document.createTextNode("."));
+                body.appendChild(p3);
             }
 
             // Build the notation: URI. Forward type so the app can route
@@ -182,31 +166,8 @@
                 notationUri += "&type=" + encodeURIComponent(type);
             }
 
-            // Build GitHub fallback URL (only used for pages/sections).
-            var githubUrl = repo + "/blob/" + branch + "/" + path;
-
-            // Wire up buttons
-            var manualBtn = document.getElementById("manualBtn");
-            manualBtn.href = notationUri;
-            manualBtn.textContent = "Edit " + typeLabel + " in Lattice Notes app";
-
-            // GitHub fallback only makes sense for pages/sections (notebooks
-            // and folders don't have a single meaningful blob to open).
-            var githubBtn = document.getElementById("githubBtn");
-            if (isNotebook || isFolder) {
-                githubBtn.style.display = "none";
-            } else {
-                githubBtn.href = githubUrl;
-            }
-
             // Attempt to open
             window.location = notationUri;
-
-            // Show fallback after 2 seconds (keep status text, just hide spinner)
-            setTimeout(function () {
-                document.getElementById("spinner").style.display = "none";
-                document.getElementById("fallback").classList.add("show");
-            }, 2000);
         })();
     </script>
 </body>
