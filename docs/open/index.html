@@ -166,8 +166,17 @@
                 notationUri += "&type=" + encodeURIComponent(type);
             }
 
-            // Attempt to open
-            window.location = notationUri;
+            // Attempt to open. Defer until the page has fully loaded so the
+            // browser can finish fetching the favicon first — Chromium-based
+            // browsers cancel in-flight low-priority resource loads (including
+            // favicon.ico) as soon as a navigation to a custom scheme is
+            // initiated, which leaves the tab with no icon.
+            function dispatch() { window.location = notationUri; }
+            if (document.readyState === "complete") {
+                setTimeout(dispatch, 0);
+            } else {
+                window.addEventListener("load", function () { setTimeout(dispatch, 0); });
+            }
         })();
     </script>
 </body>
