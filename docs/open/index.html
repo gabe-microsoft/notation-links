@@ -109,6 +109,11 @@
             // repository itself, whose leaves are files.
             var isNotebook = branch !== null && branch.indexOf("_notebook/") === 0;
 
+            // type=c is a comment thread, named by the "#anchor={id}" on
+            // `path`. Only notebooks have comments; on a repository branch the
+            // app opens the file, so the page says so.
+            var isComment = type === "c" && isNotebook;
+
             var body = document.getElementById("body");
 
             if (!repo || !branch || (!isRoot && !path)) {
@@ -119,7 +124,9 @@
                 return;
             }
 
-            var typeLabel = isSection ? "section"
+            // A thread link's title already reads "Comment on {page}".
+            var typeLabel = isComment ? "page"
+                : isSection ? "section"
                 : isFolder ? "folder"
                 : isRoot ? (isNotebook ? "notebook" : "repository")
                 : (isNotebook ? "page" : "file");
@@ -157,15 +164,17 @@
             // Every repository link has one, because every node in a repository
             // is a real path in the tree: a root and a folder point at /tree/,
             // a file and a section at /blob/ (the section's slug rides along on
-            // `path` and works as a GitHub anchor unchanged).
+            // `path` and works as a GitHub anchor unchanged). A comment isn't in
+            // the page, so its link is the page's, without the fragment.
             //
             // A notebook is different. Its root and its folders are entries in
             // structure.yml rather than directories, so there is nothing on
             // GitHub to point at and the link is omitted for those two.
             var isTree = isRoot || isFolder;
             if (!isNotebook || !isTree) {
+                var githubPath = isComment ? path.split("#")[0] : path;
                 var githubUrl = repo + (isTree ? "/tree/" : "/blob/") + branch
-                    + (path ? "/" + path : "");
+                    + (githubPath ? "/" + githubPath : "");
                 var p3 = document.createElement("p");
                 p3.appendChild(document.createTextNode("Or view read-only "));
                 var ghLink = document.createElement("a");
